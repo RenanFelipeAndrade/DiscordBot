@@ -1,6 +1,9 @@
+const data = require("../functions/fetchData")
+
 module.exports = {
   name: 'interactionCreate',
   execute(interaction) {
-    console.log(`${interaction.user.tag} in triggered an interaction.`);
+    console.log(data)
+    interaction.reply(`eae veja isso ${data.names}`)
   },
 };
