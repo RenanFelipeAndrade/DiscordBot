@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Command } from "../@types/Command";
-import { Player } from "discord-player";
+import { player } from "../instances/player";
 
 export const play: Command = {
   data: new SlashCommandBuilder()
@@ -28,11 +28,10 @@ export const play: Command = {
 
     const voiceChannel = member.voice.channel;
     if (!voiceChannel) {
-      await interaction.reply("O membro não está em um canal de voz");
+      await interaction.reply("Você não está em um canal de voz");
       return;
     }
 
-    const player = new Player(bot);
     const query = interaction.options.get("link")?.value;
     const queue = player.createQueue(guild, {
       metadata: {
