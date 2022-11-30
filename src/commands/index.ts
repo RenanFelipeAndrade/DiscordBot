@@ -1,4 +1,4 @@
 import { Command } from "../@types/Command";
-import { oneHundred } from "./oneHundred";
+import { play } from "./play";
 
-export const CommandList: Command[] = [oneHundred];
+export const CommandList: Command[] = [play];

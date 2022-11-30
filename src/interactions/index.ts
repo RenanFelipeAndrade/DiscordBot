@@ -1,11 +1,11 @@
-import { Interaction } from "discord.js";
+import { Client, Interaction } from "discord.js";
 import { CommandList } from "../commands/index";
 
-export const onInteraction = async (interaction: Interaction) => {
+export const onInteraction = async (interaction: Interaction, bot: Client) => {
   if (interaction.isCommand()) {
     for (const Command of CommandList) {
       if (interaction.commandName === Command.data.name) {
-        await Command.run(interaction);
+        await Command.run(interaction, bot);
         break;
       }
     }
