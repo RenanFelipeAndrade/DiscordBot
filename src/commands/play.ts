@@ -12,7 +12,7 @@ export const play: Command = {
         .setDescription("Youtube/Spotify/etc")
         .setRequired(true)
     ),
-  run: async (interaction, bot) => {
+  run: async (interaction, _bot) => {
     const guild = interaction.guild;
     if (!guild) {
       await interaction.reply("Ocorreu um erro com o servidor");
