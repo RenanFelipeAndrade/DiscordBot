@@ -32,7 +32,13 @@ export const play: Command = {
       return;
     }
 
-    const query = interaction.options.get("link")?.value;
+    const response = interaction.options.get("link");
+    if (!response) {
+      interaction.reply("Não foi possível ler seu link");
+      return;
+    }
+
+    const query = response.value!;
     const queue = player.createQueue(guild, {
       metadata: {
         channel: interaction.channel,
@@ -63,12 +69,14 @@ export const play: Command = {
       .search(String(query), {
         requestedBy: interaction.user,
       })
-      .then((x) => x.tracks[0]);
+      .then((result) => {
+        const queryString = query.toString();
+        const index = Number(queryString.split("index=")[1]) ?? 1;
+        return result.tracks[index - 1];
+      });
 
     if (!track) {
-      await interaction.followUp({
-        content: `A música **${query}** não foi encontrada!`,
-      });
+      await interaction.followUp({ content: `A música não foi encontrada!` });
 
       return;
     }
