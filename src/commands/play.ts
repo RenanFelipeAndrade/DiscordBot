@@ -9,7 +9,7 @@ export const play: Command = {
     .addStringOption((option) =>
       option
         .setName("link")
-        .setDescription("Youtube/Spotify/etc")
+        .setDescription("link do Youtube/Spotify/etc")
         .setRequired(true)
     ),
   run: async (interaction, _bot) => {
