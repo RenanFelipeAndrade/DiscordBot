@@ -1,4 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { GuildQueue } from "discord-player";
+import { TextBasedChannel } from "discord.js";
 import { Command } from "../@types/Command";
 import { player } from "../instances/player";
 
@@ -38,54 +40,42 @@ export const play: Command = {
       return;
     }
 
-    const query = response.value!;
-    const queue = player.createQueue(guild, {
-      metadata: {
-        channel: interaction.channel,
-      },
-      ytdlOptions: {
-        filter: "audioonly",
-        highWaterMark: 1 << 25,
-        dlChunkSize: 0,
-      },
-    });
-
-    player.on("trackStart", () =>
-      queue.metadata?.channel?.send(`🎶 | Now playing **${track.title}**!`)
-    );
-
-    try {
-      if (!queue.connection) await queue.connect(voiceChannel);
-    } catch (error) {
-      queue.clear();
-      queue.destroy(true);
-      await interaction.reply("Não foi possível se conectar");
+    const query = response.value;
+    if (!query) {
+      await interaction.reply("Insira um link");
       return;
     }
 
     await interaction.deferReply();
 
-    const track = await player
-      .search(String(query), {
-        requestedBy: interaction.user,
-      })
-      .then((result) => {
-        const queryString = query.toString();
-        const index = Number(queryString.split("index=")[1]) ?? 1;
-        return result.tracks[index - 1];
-      });
+    let queueObj:
+      | undefined
+      | GuildQueue<{
+          channel: TextBasedChannel | null;
+        }> = undefined;
 
-    if (!track) {
-      await interaction.followUp({ content: `A música não foi encontrada!` });
+    try {
+      const { track, queue } = await player.play(
+        voiceChannel,
+        query.toString(),
+        {
+          nodeOptions: {
+            metadata: {
+              channel: interaction.channel,
+            },
+          },
+        }
+      );
+      queueObj = queue;
 
-      return;
+      interaction.followUp(`**${track.title}** colocado na lista`);
+    } catch (e) {
+      console.log(e);
+      interaction.followUp(`Deu algo errado: ${e}`);
     }
 
-    queue.addTrack(track);
-    await queue.play();
-
-    await interaction.followUp({
-      content: `Carregando **${track.title}**!`,
+    player.events.on("playerStart", (_queue, track) => {
+      queueObj?.metadata?.channel?.send(`Rodando: **${track.title}**`);
     });
     return;
   },
