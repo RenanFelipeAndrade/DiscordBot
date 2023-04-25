@@ -4,8 +4,8 @@ import { player } from "../instances/player";
 
 export const stop: Command = {
   data: new SlashCommandBuilder()
-    .setName("stop")
-    .setDescription("Para de rodar as músicas"),
+    .setName("parar")
+    .setDescription("Para de rodar as músicas e limpa a lista atual"),
   run: async (interaction, _bot) => {
     const guildId = interaction.guild?.id;
     if (!guildId) {
@@ -13,7 +13,7 @@ export const stop: Command = {
       return;
     }
 
-    const queue = player.getQueue(guildId);
+    const queue = player.queues.get(guildId);
     if (!queue) {
       await interaction.reply("Não existe uma lista rodando agora");
       return;
@@ -22,7 +22,6 @@ export const stop: Command = {
     try {
       queue.clear();
       await interaction.reply("A lista de música foi limpa!");
-      queue.destroy(true);
     } catch (error) {
       console.log(error, "Error while clearing/destroying queue");
       await interaction.reply("Erro ao limpar a lista de música");
