@@ -22,6 +22,7 @@ export const stop: Command = {
     try {
       queue.clear();
       await interaction.reply("A lista de música foi limpa!");
+      player.destroy();
     } catch (error) {
       console.log(error, "Error while clearing/destroying queue");
       await interaction.reply("Erro ao limpar a lista de música");
