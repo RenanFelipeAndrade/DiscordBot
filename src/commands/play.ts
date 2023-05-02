@@ -1,7 +1,8 @@
-import { EmbedBuilder, SlashCommandBuilder } from "@discordjs/builders";
+import { SlashCommandBuilder } from "@discordjs/builders";
 import { useQueue } from "discord-player";
 import { TextBasedChannel } from "discord.js";
 import { Command } from "../@types/Command";
+import { defaultEmbed, errorEmbed, successEmbed } from "../components/embeds";
 import { player } from "../instances/player";
 
 interface Queue {
@@ -21,23 +22,8 @@ export const play: Command = {
         .setRequired(true)
     ),
   run: async (interaction, _bot) => {
-    const { reply, followUp, deferReply } = interaction;
+    const { reply, followUp, deferReply, user, guild } = interaction;
 
-    const errorEmbed = (message: string) =>
-      new EmbedBuilder()
-        .setTitle("Erro")
-        .setColor(0xed4245)
-        .setDescription(message);
-
-    const defaultEmbed = (message: string, title?: string) => {
-      const defaultEmbed = new EmbedBuilder()
-        .setDescription(message)
-        .setColor(0x4f545c);
-      if (title) defaultEmbed.setTitle(title);
-      return defaultEmbed;
-    };
-
-    const guild = interaction.guild;
     if (!guild) {
       await reply({
         embeds: [errorEmbed("Não foi possível ver informações do servidor")],
@@ -45,7 +31,6 @@ export const play: Command = {
       return;
     }
 
-    const user = interaction.user;
     const member = guild.members.cache.get(user.id);
     if (!member) {
       await reply({
@@ -109,7 +94,7 @@ export const play: Command = {
       queueObj = queue;
 
       await followUp({
-        embeds: [defaultEmbed(`**${track.title}** colocado na lista`)],
+        embeds: [successEmbed(`**${track.title}** colocado na lista`)],
       });
     } catch (e) {
       console.log(e);

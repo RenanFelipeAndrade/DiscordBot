@@ -1,26 +1,33 @@
 import { useQueue } from "discord-player";
 import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../@types/Command";
+import { errorEmbed, successEmbed } from "../components/embeds";
 
 export const skip: Command = {
   data: new SlashCommandBuilder()
     .setName("proxima")
     .setDescription("Passa para a próxima música"),
   run: async (interaction, _bot) => {
-    const guildId = interaction.guild?.id;
-    if (!guildId) {
-      await interaction.reply("Não foi possível obter informações do servidor");
+    const { reply, guild } = interaction;
+    if (!guild) {
+      await reply({
+        embeds: [errorEmbed("Não foi possível obter informações do servidor")],
+      });
       return;
     }
 
-    const queue = useQueue(guildId);
+    const queue = useQueue(guild.id);
     if (!queue) {
-      await interaction.reply("Não existe uma lista rodando agora");
+      await reply({
+        embeds: [errorEmbed("Não existe uma lista tocando agora")],
+      });
       return;
     }
 
     queue.node.skip();
-    await interaction.reply("Passei para a próxima");
+    await reply({
+      embeds: [successEmbed("Passei pra próxima")],
+    });
 
     return;
   },

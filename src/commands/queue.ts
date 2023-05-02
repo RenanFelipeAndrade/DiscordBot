@@ -1,44 +1,51 @@
-import { EmbedBuilder } from "@discordjs/builders";
 import { useQueue } from "discord-player";
 import { APIEmbedField, SlashCommandBuilder } from "discord.js";
 import { Command } from "../@types/Command";
+import { errorEmbed, primaryEmbed } from "../components/embeds";
 
 export const queue: Command = {
   data: new SlashCommandBuilder()
     .setName("playlist")
     .setDescription("Mostra a playlist atual"),
   run: async (interaction, _bot) => {
-    const guildId = interaction.guild?.id;
-    if (!guildId) {
-      await interaction.reply("Não foi possível obter informações do servidor");
+    const { reply, guild } = interaction;
+    if (!guild) {
+      await reply({
+        embeds: [errorEmbed("Não foi possível obter informações do servidor")],
+      });
       return;
     }
 
-    const queue = useQueue(guildId);
+    const queue = useQueue(guild.id);
     if (!queue) {
-      await interaction.reply("Não existe uma lista tocando agora");
+      await reply({
+        embeds: [errorEmbed("Não existe uma lista tocando agora")],
+      });
       return;
     }
 
     const trackList = queue.tracks.toArray();
 
-    // component builder
     const fields: APIEmbedField[] = trackList
       .slice(0, 10)
       .map((track, index) => {
         return {
           name: "\u200b", // zero-width space
-          // title fomart (using markdown): position - [duration] bold-link-to-music-title
+          // title fomart (using markdown): position - `[duration]` **link-to-music-title**
           value: `${index + 1} - \`[${track.duration}]\` **[${track.title}](${
             track.url
           })**`,
         };
       });
-    const message = new EmbedBuilder()
-      .setTitle("Playlist atual")
-      .addFields(fields);
 
-    await interaction.reply({ embeds: [message] });
+    await reply({
+      embeds: [
+        primaryEmbed(
+          "Playlist atual",
+          "A música atual não está inclusa"
+        ).setFields(fields),
+      ],
+    });
     return;
   },
 };
