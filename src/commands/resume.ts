@@ -15,7 +15,7 @@ export const resume: Command = {
 
     const queue = useQueue(guildId);
     if (!queue) {
-      await interaction.reply("Não existe uma lista rodando agora");
+      await interaction.reply("Não existe uma lista tocando agora");
       return;
     }
 
