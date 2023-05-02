@@ -1,8 +1,14 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { GuildQueue } from "discord-player";
+import { EmbedBuilder, SlashCommandBuilder } from "@discordjs/builders";
+import { useQueue } from "discord-player";
 import { TextBasedChannel } from "discord.js";
 import { Command } from "../@types/Command";
 import { player } from "../instances/player";
+
+interface Queue {
+  metadata: {
+    channel: TextBasedChannel | null;
+  };
+}
 
 export const play: Command = {
   data: new SlashCommandBuilder()
@@ -15,44 +21,77 @@ export const play: Command = {
         .setRequired(true)
     ),
   run: async (interaction, _bot) => {
+    const { reply, followUp, deferReply } = interaction;
+
+    const errorEmbed = (message: string) =>
+      new EmbedBuilder()
+        .setTitle("Erro")
+        .setColor(0xed4245)
+        .setDescription(message);
+
+    const defaultEmbed = (message: string, title?: string) => {
+      const defaultEmbed = new EmbedBuilder()
+        .setDescription(message)
+        .setColor(0x4f545c);
+      if (title) defaultEmbed.setTitle(title);
+      return defaultEmbed;
+    };
+
     const guild = interaction.guild;
     if (!guild) {
-      await interaction.reply("Ocorreu um erro com o servidor");
+      await reply({
+        embeds: [errorEmbed("Não foi possível ver informações do servidor")],
+      });
       return;
     }
 
-    const { user } = interaction;
+    const user = interaction.user;
     const member = guild.members.cache.get(user.id);
     if (!member) {
-      await interaction.reply("O membro não está no servidor (não sei como)");
+      await reply({
+        embeds: [errorEmbed("Não foi possível ver informações do usuário")],
+      });
       return;
     }
 
     const voiceChannel = member.voice.channel;
     if (!voiceChannel) {
-      await interaction.reply("Você não está em um canal de voz");
+      await reply({
+        embeds: [errorEmbed("Você não está no chat de voz")],
+      });
       return;
     }
 
     const response = interaction.options.get("link");
     if (!response) {
-      interaction.reply("Não foi possível ler seu link");
+      await reply({
+        embeds: [errorEmbed("Não foi possível ler seu link")],
+      });
       return;
     }
 
     const query = response.value;
     if (!query) {
-      await interaction.reply("Insira um link");
+      await reply({
+        embeds: [errorEmbed("Insira um link!")],
+      });
       return;
     }
 
-    await interaction.deferReply();
+    const queue = useQueue(guild.id);
+    if (queue) {
+      await reply({
+        embeds: [
+          errorEmbed(
+            "Já há uma playlist tocando. Use `adicionar` para adicionar músicas à playlist"
+          ),
+        ],
+      });
+    }
 
-    let queueObj:
-      | undefined
-      | GuildQueue<{
-          channel: TextBasedChannel | null;
-        }> = undefined;
+    await deferReply();
+
+    let queueObj: undefined | Queue = undefined;
 
     try {
       const { track, queue } = await player.play(
@@ -66,16 +105,23 @@ export const play: Command = {
           },
         }
       );
+
       queueObj = queue;
 
-      interaction.followUp(`**${track.title}** colocado na lista`);
+      await followUp({
+        embeds: [defaultEmbed(`**${track.title}** colocado na lista`)],
+      });
     } catch (e) {
       console.log(e);
-      interaction.followUp(`Deu algo errado: ${e}`);
+      await followUp({
+        embeds: [errorEmbed(`Algo deu errado: ${e}`)],
+      });
     }
 
     player.events.on("playerStart", (_queue, track) => {
-      queueObj?.metadata?.channel?.send(`Rodando: **${track.title}**`);
+      queueObj?.metadata?.channel?.send({
+        embeds: [defaultEmbed(`Tocando: **${track.title}**`)],
+      });
     });
     return;
   },
