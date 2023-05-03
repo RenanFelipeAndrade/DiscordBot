@@ -8,9 +8,9 @@ export const stop: Command = {
     .setName("parar")
     .setDescription("Para de tocar as músicas e limpa a lista atual"),
   run: async (interaction, _bot) => {
-    const { reply, guild } = interaction;
+    const guild = interaction.guild;
     if (!guild) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não foi possível obter informações do servidor")],
       });
       return;
@@ -18,7 +18,7 @@ export const stop: Command = {
 
     const queue = player.queues.get(guild);
     if (!queue) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não existe uma lista tocando agora")],
       });
       return;
@@ -26,10 +26,14 @@ export const stop: Command = {
 
     try {
       queue.delete();
-      await reply({ embeds: [successEmbed("A lista de música foi limpa!")] });
+      await interaction.reply({
+        embeds: [successEmbed("A lista de música foi limpa!")],
+      });
     } catch (error) {
       console.log(error, "Error while clearing/destroying queue");
-      await reply({ embeds: [errorEmbed("Erro ao limpar a lista de música")] });
+      await interaction.reply({
+        embeds: [errorEmbed("Erro ao limpar a lista de música")],
+      });
     }
 
     return;

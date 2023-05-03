@@ -22,18 +22,18 @@ export const play: Command = {
         .setRequired(true)
     ),
   run: async (interaction, _bot) => {
-    const { reply, followUp, deferReply, user, guild } = interaction;
-
+    const guild = interaction.guild;
     if (!guild) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não foi possível ver informações do servidor")],
       });
       return;
     }
 
+    const user = interaction.user;
     const member = guild.members.cache.get(user.id);
     if (!member) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não foi possível ver informações do usuário")],
       });
       return;
@@ -41,7 +41,7 @@ export const play: Command = {
 
     const voiceChannel = member.voice.channel;
     if (!voiceChannel) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Você não está no chat de voz")],
       });
       return;
@@ -49,7 +49,7 @@ export const play: Command = {
 
     const response = interaction.options.get("link");
     if (!response) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não foi possível ler seu link")],
       });
       return;
@@ -57,7 +57,7 @@ export const play: Command = {
 
     const query = response.value;
     if (!query) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Insira um link!")],
       });
       return;
@@ -65,7 +65,7 @@ export const play: Command = {
 
     const queue = useQueue(guild.id);
     if (queue) {
-      await reply({
+      await interaction.reply({
         embeds: [
           errorEmbed(
             "Já há uma playlist tocando. Use `adicionar` para adicionar músicas à playlist"
@@ -74,7 +74,10 @@ export const play: Command = {
       });
     }
 
-    await deferReply();
+    // if deferReply function is deconstruct
+    // an error is thrown
+    // TypeError: Cannot read properties of undefined (reading 'deferred')
+    await interaction.deferReply();
 
     let queueObj: undefined | Queue = undefined;
 
@@ -93,12 +96,12 @@ export const play: Command = {
 
       queueObj = queue;
 
-      await followUp({
+      await interaction.followUp({
         embeds: [successEmbed(`**${track.title}** colocado na lista`)],
       });
     } catch (e) {
       console.log(e);
-      await followUp({
+      await interaction.followUp({
         embeds: [errorEmbed(`Algo deu errado: ${e}`)],
       });
     }

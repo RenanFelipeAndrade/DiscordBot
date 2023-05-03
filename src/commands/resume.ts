@@ -10,7 +10,7 @@ export const resume: Command = {
   run: async (interaction, _bot) => {
     const { reply, guild } = interaction;
     if (!guild) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não foi possível obter informações do servidor")],
       });
       return;
@@ -18,14 +18,14 @@ export const resume: Command = {
 
     const queue = useQueue(guild.id);
     if (!queue) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não existe uma lista tocando agora")],
       });
       return;
     }
 
     queue.node.resume();
-    await reply({
+    await interaction.reply({
       embeds: [successEmbed("A playlist foi retomada")],
     });
 

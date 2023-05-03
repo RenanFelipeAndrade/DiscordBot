@@ -8,9 +8,9 @@ export const queue: Command = {
     .setName("playlist")
     .setDescription("Mostra a playlist atual"),
   run: async (interaction, _bot) => {
-    const { reply, guild } = interaction;
+    const guild = interaction.guild;
     if (!guild) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não foi possível obter informações do servidor")],
       });
       return;
@@ -18,7 +18,7 @@ export const queue: Command = {
 
     const queue = useQueue(guild.id);
     if (!queue) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não existe uma lista tocando agora")],
       });
       return;
@@ -38,7 +38,7 @@ export const queue: Command = {
         };
       });
 
-    await reply({
+    await interaction.reply({
       embeds: [
         primaryEmbed(
           "Playlist atual",

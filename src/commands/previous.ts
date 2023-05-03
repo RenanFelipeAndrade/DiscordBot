@@ -1,12 +1,12 @@
-import { useQueue } from "discord-player";
+import { useHistory, useQueue } from "discord-player";
 import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../@types/Command";
 import { errorEmbed, successEmbed } from "../components/embeds";
 
-export const skip: Command = {
+export const previous: Command = {
   data: new SlashCommandBuilder()
-    .setName("proxima")
-    .setDescription("Passa para a próxima música"),
+    .setName("anterior")
+    .setDescription("Retorna para a musica anterior"),
   run: async (interaction, _bot) => {
     const guild = interaction.guild;
     if (!guild) {
@@ -19,14 +19,25 @@ export const skip: Command = {
     const queue = useQueue(guild.id);
     if (!queue) {
       await interaction.reply({
-        embeds: [errorEmbed("Não existe uma lista tocando agora")],
+        embeds: [errorEmbed("Não existe uma playlist tocando agora")],
       });
       return;
     }
 
-    queue.node.skip();
+    const history = useHistory(guild.id);
+    if (!history) {
+      await interaction.reply({
+        embeds: [
+          errorEmbed("Não foi possível obter a(s) música(s) anterior(es)"),
+        ],
+      });
+      return;
+    }
+
+    await history.previous();
+
     await interaction.reply({
-      embeds: [successEmbed("Passei pra próxima")],
+      embeds: [successEmbed("Retornei para a anterior")],
     });
 
     return;

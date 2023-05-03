@@ -15,15 +15,18 @@ export const add: Command = {
         .setRequired(true)
     ),
   run: async (interaction, _bot) => {
-    const { reply, deferReply, followUp, user, guild } = interaction;
+    const guild = interaction.guild;
     if (!guild) {
-      await reply({ embeds: [errorEmbed("Ocorreu um erro com o servidor")] });
+      await interaction.reply({
+        embeds: [errorEmbed("Ocorreu um erro com o servidor")],
+      });
       return;
     }
 
+    const user = interaction.user;
     const member = guild.members.cache.get(user.id);
     if (!member) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("O membro não está no servidor (não sei como)")],
       });
       return;
@@ -31,25 +34,29 @@ export const add: Command = {
 
     const voiceChannel = member.voice.channel;
     if (!voiceChannel) {
-      await reply({ embeds: [errorEmbed("Você não está em um canal de voz")] });
+      await interaction.reply({
+        embeds: [errorEmbed("Você não está em um canal de voz")],
+      });
       return;
     }
 
     const response = interaction.options.get("link");
     if (!response) {
-      reply({ embeds: [errorEmbed("Não foi possível ler seu link")] });
+      interaction.reply({
+        embeds: [errorEmbed("Não foi possível ler seu link")],
+      });
       return;
     }
 
     const query = response.value;
     if (!query) {
-      await reply({ embeds: [errorEmbed("Insira um link")] });
+      await interaction.reply({ embeds: [errorEmbed("Insira um link")] });
       return;
     }
 
     const result = await player.search(query.toString());
     if (!result) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não foi possível encontrar a música")],
       });
       return;
@@ -57,21 +64,23 @@ export const add: Command = {
 
     const queue = useQueue(guild.id);
     if (!queue) {
-      await reply({ embeds: [errorEmbed("Não há uma playlist no momento")] });
+      await interaction.reply({
+        embeds: [errorEmbed("Não há uma playlist no momento")],
+      });
       return;
     }
 
-    await deferReply();
+    await interaction.deferReply();
 
     try {
       const track = result.tracks[0];
       queue.addTrack(track);
-      await followUp({
+      await interaction.followUp({
         embeds: [successEmbed(`**${track.title}** adicionada na playlist`)],
       });
     } catch (error) {
       console.log(error);
-      await followUp({
+      await interaction.followUp({
         embeds: [errorEmbed("Ocorreu um erro ao adicionar a música na lista")],
       });
     }

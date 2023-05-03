@@ -8,9 +8,9 @@ export const pause: Command = {
     .setName("pausar")
     .setDescription("Pausa a playlist"),
   run: async (interaction, _bot) => {
-    const { reply, guild } = interaction;
+    const guild = interaction.guild;
     if (!guild) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não foi possível obter informações do servidor")],
       });
       return;
@@ -18,14 +18,14 @@ export const pause: Command = {
 
     const queue = useQueue(guild.id);
     if (!queue) {
-      await reply({
+      await interaction.reply({
         embeds: [errorEmbed("Não existe uma lista tocando agora")],
       });
       return;
     }
 
     queue.node.setPaused(!queue.node.isPaused());
-    await reply({
+    await interaction.reply({
       embeds: [successEmbed("A playlist foi pausada")],
     });
 
