@@ -43,7 +43,7 @@ but some are in English (those words that are well-known):
 - `pausar`: pauses the current track
 - `retomar`: resumes the current track
 - `parar`: stops the player, clears the queue, and makes the bot disconnect
-- `playlist`: shows the current queue. It excludes the current track playing (can be changed to include the current track)
+- `playlist`: shows the current queue.
 - `proxima`: skips to the next track
 
 > There are many more commands coming in the near future!

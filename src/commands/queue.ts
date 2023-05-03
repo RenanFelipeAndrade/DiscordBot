@@ -39,12 +39,7 @@ export const queue: Command = {
       });
 
     await interaction.reply({
-      embeds: [
-        primaryEmbed(
-          "Playlist atual",
-          "A música atual não está inclusa"
-        ).setFields(fields),
-      ],
+      embeds: [primaryEmbed("Playlist atual").setFields(fields)],
     });
     return;
   },
