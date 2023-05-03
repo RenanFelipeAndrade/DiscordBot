@@ -72,6 +72,7 @@ export const play: Command = {
           ),
         ],
       });
+      return;
     }
 
     // if deferReply function is deconstruct
@@ -94,6 +95,7 @@ export const play: Command = {
         }
       );
 
+      queue.addTrack(track);
       queueObj = queue;
 
       await interaction.followUp({
