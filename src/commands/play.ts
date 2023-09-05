@@ -95,7 +95,6 @@ export const play: Command = {
         }
       );
 
-      queue.addTrack(track);
       queueObj = queue;
 
       await interaction.followUp({

@@ -7,6 +7,7 @@ import { resume } from "./resume";
 import { skip } from "./skip";
 import { queue } from "./queue";
 import { previous } from "./previous";
+import { lyrics } from "./lyrics";
 
 export const CommandList: Command[] = [
   play,
@@ -17,4 +18,5 @@ export const CommandList: Command[] = [
   skip,
   queue,
   previous,
+  lyrics,
 ];
